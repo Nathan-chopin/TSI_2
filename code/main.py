@@ -3,7 +3,7 @@
 import OpenGL.GL as GL
 import glfw
 import numpy as np
-import tool
+from tool import create_program_from_file
 
 class Game(object):
     """ fenêtre GLFW avec openGL """
@@ -37,7 +37,7 @@ class Game(object):
         GL.glEnable(GL.GL_DEPTH_TEST)
 
     def init_programs(self):
-        GL.glUseProgram(program)
+        GL.glUseProgram(create_program_from_file("shader.vert","shader.frag"))
 
 
 
