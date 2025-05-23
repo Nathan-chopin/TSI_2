@@ -3,6 +3,7 @@
 import OpenGL.GL as GL
 import glfw
 import numpy as np
+import tool
 
 class Game(object):
     """ fenêtre GLFW avec openGL """
@@ -36,7 +37,10 @@ class Game(object):
         GL.glEnable(GL.GL_DEPTH_TEST)
 
     def init_programs(self):
-        pass
+        GL.glUseProgram(program)
+
+
+
         
     def init_data(self):
         pass
@@ -44,14 +48,16 @@ class Game(object):
     def run(self):
         # boucle d'affichage
         while not glfw.window_should_close(self.window):
-            # choix de la couleur de fond
-            GL.glClearColor(0.5, 0.6, 0.9, 1.0)
+            # choix de la couleur de fondglClear
+            GL.glClearColor(abs(np.cos(glfw.get_time())), abs(np.sin(glfw.get_time()*2)), abs(np.arctan(glfw.get_time())), 1.0)
             # nettoyage de la fenêtre : fond et profondeur
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
             # changement de buffer d'affichage pour éviter un effet de scintillement
             glfw.swap_buffers(self.window)
             # gestion des évènements
             glfw.poll_events()
+
+            
     
     def key_callback(self, win, key, scancode, action, mods):
         # sortie du programme si appui sur la touche 'echap'
