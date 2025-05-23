@@ -39,19 +39,44 @@ class Game(object):
     def init_programs(self):
         GL.glUseProgram(create_program_from_file("shader.vert","shader.frag"))
 
-
-
         
     def init_data(self):
-        pass
+        sommets = np.array(((0, 0, 0), (1, 0, 0), (0, 1, 0)), np.float32)
+        # attribution d'une liste d'´etat (1 indique la cr´eation d'une seule liste)
+        vao = GL.glGenVertexArrays(1)
+        # affectation de la liste d'´etat courante
+        GL.glBindVertexArray(vao)
+        # attribution d’un buffer de donn´ees (1 indique la cr´eation d’un seul buffer)
+        vbo = GL.glGenBuffers(1)
+        # affectation du buffer courant
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo)
+        # copie des donnees des sommets sur la carte graphique
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sommets, GL.GL_STATIC_DRAW)
+        # Les deux commandes suivantes sont stock´ees dans l'´etat du vao courant
+        # Active l'utilisation des donn´ees de positions
+        # (le 0 correspond `a la location dans le vertex shader)
+        GL.glEnableVertexAttribArray(0)
+        # Indique comment le buffer courant (dernier vbo "bind´e")
+        # est utilis´e pour les positions des sommets
+        GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+        # R´ecup`ere l'identifiant du programme courant
+        prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+        # R´ecup`ere l'identifiant de la variable translation dans le programme courant
+        loc = GL.glGetUniformLocation(prog, "translation")
+        # V´erifie que la variable existe
+        if loc == -1 :
+            print("Pas de variable uniforme : translation")
+        # Modifie la variable pour le programme courant
+        GL.glUniform4f(loc, -0.5, 0, 0, 0)
 
     def run(self):
         # boucle d'affichage
         while not glfw.window_should_close(self.window):
             # choix de la couleur de fondglClear
-            GL.glClearColor(abs(np.cos(glfw.get_time())), abs(np.sin(glfw.get_time()*2)), abs(np.arctan(glfw.get_time())), 1.0)
+            GL.glClearColor(0.5, 0.6, 0.9, 1.0)
             # nettoyage de la fenêtre : fond et profondeur
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+            GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
             # changement de buffer d'affichage pour éviter un effet de scintillement
             glfw.swap_buffers(self.window)
             # gestion des évènements
