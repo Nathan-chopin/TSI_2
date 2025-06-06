@@ -4,11 +4,15 @@ import OpenGL.GL as GL
 import glfw
 import numpy as np
 from tool import create_program_from_file
+import pyrr
 
 class Game(object):
     """ fenêtre GLFW avec openGL """
 
     def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.r = 0
         self.window = self.init_window()
         self.init_context()
         self.init_programs()
@@ -59,15 +63,7 @@ class Game(object):
         # Indique comment le buffer courant (dernier vbo "bind´e")
         # est utilis´e pour les positions des sommets
         GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
-        # R´ecup`ere l'identifiant du programme courant
-        prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
-        # R´ecup`ere l'identifiant de la variable translation dans le programme courant
-        loc = GL.glGetUniformLocation(prog, "translation")
-        # V´erifie que la variable existe
-        if loc == -1 :
-            print("Pas de variable uniforme : translation")
-        # Modifie la variable pour le programme courant
-        GL.glUniform4f(loc, -0.5, 0, 0, 0)
+
 
     def run(self):
         # boucle d'affichage
@@ -77,6 +73,8 @@ class Game(object):
             # nettoyage de la fenêtre : fond et profondeur
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
             GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+
+
             # changement de buffer d'affichage pour éviter un effet de scintillement
             glfw.swap_buffers(self.window)
             # gestion des évènements
@@ -85,9 +83,46 @@ class Game(object):
             
     
     def key_callback(self, win, key, scancode, action, mods):
-        # sortie du programme si appui sur la touche 'echap'
+
+        prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+        loc = GL.glGetUniformLocation(prog, "translation")
+        loc2 = GL.glGetUniformLocation(prog, "rotation")
+
+        color = GL.glGetUniformLocation(prog, "color1")
+       
         if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
             glfw.set_window_should_close(win, glfw.TRUE)
+        
+        if key == glfw.KEY_R and action == glfw.PRESS:
+            GL.glUniform4f(color, 1, 0,0, 0)
+        
+        if key == glfw.KEY_G and action == glfw.PRESS:
+            GL.glUniform4f(color, 0, 1,0, 0)
+
+        if key == glfw.KEY_B and action == glfw.PRESS:
+            GL.glUniform4f(color, 0, 0,1,0)
+        
+        if key == glfw.KEY_Z and glfw.get_key(win, glfw.KEY_Z)  == glfw.PRESS:
+            GL.glUniform4f(loc, self.x, self.y+0.01,0, 0)
+            self.y+=0.01
+        
+        if key == glfw.KEY_Q and glfw.get_key(win, glfw.KEY_Q) == glfw.PRESS:
+            GL.glUniform4f(loc, self.x-0.01, self.y,0, 0)
+            self.x-=0.01
+
+        if key == glfw.KEY_S and glfw.get_key(win, glfw.KEY_S) == glfw.PRESS:
+            GL.glUniform4f(loc, self.x, self.y-0.01,0, 0)
+            self.y-=0.01
+
+        if key == glfw.KEY_D and glfw.get_key(win, glfw.KEY_D) == glfw.PRESS:
+            GL.glUniform4f(loc, self.x+0.01, self.y,0, 0)
+            self.x+=0.01
+        
+        if key == glfw.KEY_I and glfw.get_key(win, glfw.KEY_I)  == glfw.PRESS:
+            rot3 = pyrr.matrix33.create_from_z_rotation(np.pi*self.r/200)
+            rot4 = pyrr.matrix44.create_from_matrix33(rot3)
+            GL.glUniformMatrix4fv(loc2, 1, GL.GL_FALSE, rot4)
+            self.r += 1
 
 def main():
     g = Game()
